@@ -15,7 +15,10 @@ using std::endl;
 using std::string;
 
 
-static int main_genkeys( ProtoboardT& pb, const char *arith_file, const char *pk_raw, const char *vk_json )
+static int main_genkeys( ProtoboardT& pb,
+			 const char *arith_file,
+			 const char *pk_raw,
+			 const char *vk_json )
 {
 	CircuitReader circuit(pb, arith_file, nullptr);
 
@@ -27,7 +30,11 @@ static int main_genkeys( ProtoboardT& pb, const char *arith_file, const char *pk
 }
 
 
-static int main_prove( ProtoboardT& pb, const char *arith_file, const char *circuit_inputs, const char* pk_raw, const char *proof_json )
+static int main_prove( ProtoboardT& pb,
+		       const char *arith_file,
+		       const char *circuit_inputs,
+		       const char* pk_raw,
+		       const char *proof_json )
 {
 	CircuitReader circuit(pb, arith_file, circuit_inputs);
 
@@ -47,7 +54,9 @@ static int main_prove( ProtoboardT& pb, const char *arith_file, const char *circ
 }
 
 
-static int main_test( ProtoboardT& pb, const char *arith_file, const char *circuit_inputs )
+static int main_test( ProtoboardT& pb,
+		      const char *arith_file,
+		      const char *circuit_inputs )
 {
 	CircuitReader circuit(pb, arith_file, circuit_inputs);
 
@@ -60,7 +69,10 @@ static int main_test( ProtoboardT& pb, const char *arith_file, const char *circu
 }
 
 
-static int main_eval( ProtoboardT& pb, const char *arith_file, const char *circuit_inputs, bool traceEnabled )
+static int main_eval( ProtoboardT& pb,
+		      const char *arith_file,
+		      const char *circuit_inputs,
+		      bool traceEnabled )
 {
 	CircuitReader circuit(pb, arith_file, circuit_inputs, traceEnabled);
 
@@ -85,9 +97,13 @@ int main(int argc, char **argv)
 	ppT::init_public_params();
 
 	const string progname(argv[0]);
-	const string usage_prefix(string("Usage: ") + progname + " <circuit.arith> ");
+	const string usage_prefix(string("Usage: ")
+				  + progname
+				  + " <circuit.arith> ");
 	if( argc < 3 ) {
-		cerr << usage_prefix << "<genkeys|prove|verify|eval|trace|test>" << endl;
+		cerr << usage_prefix
+		     << "<genkeys|prove|verify|eval|trace|test>"
+		     << endl;
 		return 1;
 	}
 
@@ -99,7 +115,10 @@ int main(int argc, char **argv)
 
 	if( cmd == "genkeys" ) {
 		if( sub_argc < 2 ) {
-			cerr << usage_prefix << cmd << " <proving-key.raw> <verification-key.json>" << endl;
+			cerr << usage_prefix
+			     << cmd
+			     << " <proving-key.raw> <verification-key.json>"
+			     << endl;
 			return 5;
 		}
 		const char *pk_raw = sub_argv[0];
@@ -108,7 +127,10 @@ int main(int argc, char **argv)
 	}
 	else if( cmd == "prove" ) {
 		if( sub_argc < 3 ) {
-			cerr << usage_prefix << cmd << " <circuit.inputs> <proving-key.raw> <output-proof.json>" << endl;
+			cerr << usage_prefix
+			     << cmd
+			     << " <circuit.inputs> <proving-key.raw> <output-proof.json>"
+			     << endl;
 			return 5;
 		}
 		const char *circuit_inputs = sub_argv[0];
@@ -118,7 +140,10 @@ int main(int argc, char **argv)
 	}
 	else if( cmd == "verify" ) {
 		if( sub_argc < 2 ) {
-			cerr << usage_prefix << cmd << " <verification-key.json> <proof.json>" << endl;
+			cerr << usage_prefix
+			     << cmd
+			     << " <verification-key.json> <proof.json>"
+			     << endl;
 			return 5;
 		}
 		return stub_main_verify("", 3, (const char**)&argv[2]);

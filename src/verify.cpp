@@ -22,17 +22,15 @@ struct noop {
 
 int main( int argc, char **argv )
 {
-	if( argc < 3 )
-	{
+	if( argc < 3 ) {
 		::fprintf(stderr, "Usage: %s <vk.json> <proof.json>\n", argv[0]);
 		return 1;
 	}
 
 	ppT::init_public_params();
 
-	// XXX: if argv[1] and argv[2] are both "-" do we read combined input from stdin?
-	// e.g. {"proof": ..., "vk": ...}
-
+	// XXX: if argv[1] and argv[2] are both "-" do we read combined input
+	// from stdin? e.g. {"proof": ..., "vk": ...}
 	// Read input file (or stdin) into vk_stream;
 	stringstream vk_stream;
 	if( 0 == ::strcmp(argv[1], "-") ) {
@@ -61,7 +59,9 @@ int main( int argc, char **argv )
 	auto proof_pair = proof_from_json(proof_stream);
 
 	// Then perform verification
-	auto status = r1cs_gg_ppzksnark_zok_verifier_strong_IC <ppT> (vk, proof_pair.first, proof_pair.second);
+	auto status = r1cs_gg_ppzksnark_zok_verifier_strong_IC <ppT> (vk,
+		proof_pair.first,
+		proof_pair.second);
 	if( status ) {
 		printf("OK\n");
 		return 0;

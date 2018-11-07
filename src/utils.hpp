@@ -10,7 +10,8 @@
 namespace ethsnarks {
 
 
-void print_bytes( const char *prefix, const size_t n_bytes, const uint8_t *in_bytes );
+void print_bytes( const char *prefix, const size_t n_bytes,
+		  const uint8_t *in_bytes );
 
 void print_bv( const char *prefix, const libff::bit_vector &vec );
 
@@ -20,16 +21,21 @@ bool hex_to_bytes( const char *in_hex, uint8_t *out_bytes, size_t out_sz );
 
 int char2int( const char input );
 
-std::vector<unsigned long> bit_list_to_ints(std::vector<bool> bit_list, const size_t wordsize);
+std::vector<unsigned long> bit_list_to_ints(std::vector<bool> bit_list,
+					    const size_t wordsize);
 
 libff::bit_vector bytes_to_bv(const uint8_t *in_bytes, const size_t in_count);
 
-VariableArrayT VariableArray_from_bits( ProtoboardT &in_pb, const libff::bit_vector& bits, const std::string &annotation_prefix="" );
+VariableArrayT VariableArray_from_bits(
+				       ProtoboardT &in_pb,
+				       const libff::bit_vector& bits,
+				       const std::string &annotation_prefix="" );
 
 void dump_pb_r1cs_constraints(const ProtoboardT& pb);
 
 
-inline const VariableArrayT make_var_array( ProtoboardT &in_pb, size_t n, const std::string &annotation )
+inline const VariableArrayT make_var_array( ProtoboardT &in_pb, size_t n,
+					    const std::string &annotation )
 {
     VariableArrayT x;
     x.allocate(in_pb, n, annotation);
@@ -38,7 +44,8 @@ inline const VariableArrayT make_var_array( ProtoboardT &in_pb, size_t n, const 
 
 
 /* `allocate_var_index` is private, must use this workaround... */
-inline const VariableT make_variable( ProtoboardT &in_pb, const std::string &annotation )
+inline const VariableT make_variable( ProtoboardT &in_pb,
+				      const std::string &annotation )
 {
     VariableT x;
     x.allocate(in_pb, annotation);
@@ -47,7 +54,10 @@ inline const VariableT make_variable( ProtoboardT &in_pb, const std::string &ann
 
 
 /* Multiply a variable by a static number, as a linear combination term */
-inline const libsnark::pb_linear_combination<FieldT> make_linear_term( ProtoboardT &in_pb, VariableT var, FieldT coeff )
+inline const libsnark::pb_linear_combination<FieldT> make_linear_term(
+    ProtoboardT &in_pb,
+    VariableT var,
+    FieldT coeff )
 {
     libsnark::pb_linear_combination<FieldT> lc;
     lc.assign(in_pb, var * coeff);

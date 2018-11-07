@@ -22,7 +22,8 @@ bool stub_verify( const char *vk_json, const char *proof_json )
     proof_stream << proof_json;
     auto proof_pair = proof_from_json(proof_stream);
 
-    auto status = libsnark::r1cs_gg_ppzksnark_zok_verifier_strong_IC <ppT> (vk, proof_pair.first, proof_pair.second);
+    auto status = libsnark::r1cs_gg_ppzksnark_zok_verifier_strong_IC <ppT> (
+	  vk, proof_pair.first, proof_pair.second);
     if( status )
         return true;
 
@@ -36,14 +37,17 @@ std::string stub_prove_from_pb( ProtoboardT& pb, const char *pk_file )
     // TODO: verify if proving key was loaded correctly, if not return NULL
 
     auto primary_input = pb.primary_input();
-    auto proof = libsnark::r1cs_gg_ppzksnark_zok_prover<ethsnarks::ppT>(proving_key, primary_input, pb.auxiliary_input());
+    auto proof = libsnark::r1cs_gg_ppzksnark_zok_prover<ethsnarks::ppT>(
+	proving_key, primary_input, pb.auxiliary_input());
     return ethsnarks::proof_to_json(proof, primary_input);
 }
 
 
-int stub_genkeys_from_pb( ProtoboardT& pb, const char *pk_file, const char *vk_file )
+int stub_genkeys_from_pb( ProtoboardT& pb, const char *pk_file,
+			  const char *vk_file )
 {
-    auto keypair = libsnark::r1cs_gg_ppzksnark_zok_generator<ppT>(pb.get_constraint_system());
+    auto keypair = libsnark::r1cs_gg_ppzksnark_zok_generator<ppT>(
+	pb.get_constraint_system());
     vk2json_file(keypair.vk, vk_file);
     writeToFile<decltype(keypair.pk)>(pk_file, keypair.pk);
 
@@ -55,7 +59,8 @@ int stub_main_verify( const char *prog_name, int argc, const char **argv )
 {
     if( argc < 3 )
     {
-        std::cerr << "Usage: " << prog_name << " " << argv[0] << " <vk.json> <proof.json>" << std::endl;
+        std::cerr << "Usage: " << prog_name << " " << argv[0]
+		  << " <vk.json> <proof.json>" << std::endl;
         return 1;
     }
 
@@ -103,9 +108,13 @@ bool stub_test_proof_verify( const ProtoboardT &in_pb )
 
     auto primary_input = in_pb.primary_input();
     auto auxiliary_input = in_pb.auxiliary_input();
-    auto proof = libsnark::r1cs_gg_ppzksnark_zok_prover<ppT>(keypair.pk, primary_input, auxiliary_input);
+    auto proof = libsnark::r1cs_gg_ppzksnark_zok_prover<ppT>(keypair.pk,
+							     primary_input,
+							     auxiliary_input);
 
-    return libsnark::r1cs_gg_ppzksnark_zok_verifier_strong_IC <ppT> (keypair.vk, primary_input, proof);
+    return libsnark::r1cs_gg_ppzksnark_zok_verifier_strong_IC <ppT> (keypair.vk,
+							   primary_input,
+							   proof);
 }
 
 

@@ -16,7 +16,9 @@ int main(int argc, char **argv)
 	ProtoboardT pb;
 	ppT::init_public_params();
 
-	const string usage(string("Usage: ") + argv[0] + " <circuit.arith> <circuit.input>");
+	const string usage(string("Usage: ")
+			   + argv[0]
+			   + " <circuit.arith> <circuit.input>");
 
 	if( argc < 3 ) {
 		cerr << usage << endl;

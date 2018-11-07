@@ -24,7 +24,11 @@ static int main_prove( int argc, char **argv )
 {
     if( argc < (9 + (int)MIXIMUS_TREE_DEPTH) )
     {
-        cerr << "Usage: " << argv[0] << " prove <pk.raw> <proof.json> <public:root> <public:nullifier> <public:exthash> <secret:preimage> <secret:merkle-address> <secret:merkle-path ...>" << endl;
+        cerr << "Usage: "
+	     << argv[0]
+	     << " prove <pk.raw> <proof.json> <public:root> <public:nullifier> "
+             << "<public:exthash> <secret:preimage> <secret:merkle-address> "
+	     <<"<secret:merkle-path ...>" << endl;
         cerr << "Args: " << endl;
         cerr << "\t<pk.raw>         Path to proving key" << endl;
         cerr << "\t<proof.json>     Write proof to this file" << endl;
@@ -50,7 +54,13 @@ static int main_prove( int argc, char **argv )
         arg_path[i] = argv[9 + i];
     }
 
-    auto json = miximus_prove(pk_filename, arg_root, arg_nullifier, arg_exthash, arg_preimage, arg_address, arg_path);
+    auto json = miximus_prove(pk_filename,
+			      arg_root,
+			      arg_nullifier,
+			      arg_exthash,
+			      arg_preimage,
+			      arg_address,
+			      arg_path);
 
     ofstream fh;
     fh.open(proof_filename, std::ios::binary);

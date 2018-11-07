@@ -20,7 +20,8 @@ libff::bit_vector bytes_to_bv(const uint8_t *in_bytes, const size_t in_count)
 }
 
 
-std::vector<unsigned long> bit_list_to_ints(std::vector<bool> bit_list, const size_t wordsize)
+std::vector<unsigned long> bit_list_to_ints(std::vector<bool> bit_list,
+					    const size_t wordsize)
 {
     std::vector<unsigned long> res;
     size_t iterations = bit_list.size()/wordsize;
@@ -141,7 +142,9 @@ void dump_pb_r1cs_constraints(const ProtoboardT& pb)
 {
     auto full_variable_assignment = pb.primary_input();
     const auto auxiliary_input = pb.auxiliary_input();
-    full_variable_assignment.insert(full_variable_assignment.end(), auxiliary_input.begin(), auxiliary_input.end());
+    full_variable_assignment.insert(full_variable_assignment.end(),
+				    auxiliary_input.begin(),
+				    auxiliary_input.end());
 
     const auto cs = pb.get_constraint_system();
 
@@ -153,12 +156,16 @@ void dump_pb_r1cs_constraints(const ProtoboardT& pb)
         const FieldT cres = constraint.c.evaluate(full_variable_assignment);
 
         auto it = cs.constraint_annotations.find(i);
-        printf("constraint %u (%s)\n", i++, (it == cs.constraint_annotations.end() ? "no annotation" : it->second.c_str()));
+        printf("constraint %u (%s)\n", i++,
+	       (it == cs.constraint_annotations.end()
+		? "no annotation"
+		: it->second.c_str()));
         printf("\t<a,(1,x)> = "); ares.print();
         printf("\t<b,(1,x)> = "); bres.print();
         printf("\t<c,(1,x)> = "); cres.print();
         printf("constraint was:\n");
-        dump_r1cs_constraint(constraint, full_variable_assignment, cs.variable_annotations);
+        dump_r1cs_constraint(constraint, full_variable_assignment,
+			     cs.variable_annotations);
         printf("\n");
     }
 }

@@ -12,7 +12,8 @@ int stub_main_verify( const char *prog_name, int argc, const char **argv );
 
 bool stub_test_proof_verify( const ProtoboardT &in_pb );
 
-int stub_genkeys_from_pb( ProtoboardT& pb, const char *pk_file, const char *vk_file );
+int stub_genkeys_from_pb( ProtoboardT& pb, const char *pk_file,
+			  const char *vk_file );
 
 std::string stub_prove_from_pb( ProtoboardT& pb, const char *pk_file );
 
@@ -35,7 +36,8 @@ int stub_main_genkeys( const char *prog_name, int argc, char **argv )
 {
     if( argc < 3 )
     {
-        std::cerr << "Usage: " << prog_name << " " << argv[0] << " <pk-output.raw> <vk-output.json>" << std::endl;
+        std::cerr << "Usage: " << prog_name << " " << argv[0]
+		  << " <pk-output.raw> <vk-output.json>" << std::endl;
         return 1;
     }
 
@@ -44,7 +46,8 @@ int stub_main_genkeys( const char *prog_name, int argc, char **argv )
 
     if( 0 != stub_genkeys<GadgetT>( pk_file, vk_file ) )
     {
-        std::cerr << "Error: failed to generate proving and verifying keys" << std::endl;
+        std::cerr << "Error: failed to generate proving and verifying keys"
+		  << std::endl;
         return 1;
     }
 
