@@ -1,13 +1,11 @@
-// Copyright (c) 2018 HarryR
+// Copyright (c) 2018 fleupold
 // License: LGPL-3.0+
 
 #include "lookup_signed_3bit.hpp"
 
 #include "utils.hpp"
 
-
 namespace ethsnarks {
-
 
 void lookup_signed_3bit_constraints( ProtoboardT& pb, const std::vector<FieldT> c, const VariableArrayT b, const VariableT r, const VariableT b0b1, const std::string& annotation_prefix )
 {

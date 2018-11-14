@@ -5,7 +5,6 @@
 #include "gadgets/lookup_signed_3bit.hpp"
 #include "jubjub/adder.hpp"
 
-
 namespace ethsnarks {
 
 namespace jubjub {

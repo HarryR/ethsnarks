@@ -1,7 +1,7 @@
 #ifndef ETHSNARKS_LOOKUP_SIGNED_3BIT_HPP_
 #define ETHSNARKS_LOOKUP_SIGNED_3BIT_HPP_
 
-// Copyright (c) 2018 HarryR
+// Copyright (c) 2018 fleupold
 // License: LGPL-3.0+
 
 #include "ethsnarks.hpp"
