@@ -122,15 +122,25 @@ def pedersen_hash_zcash_scalars(name, *scalars):
 		row_0 = [base, 2*base, 3*base, 4*base]
 		row_1 = [16*base, 32*base, 48*base, 64*base]
 		row_2 = [256*base, 512*base, 768*base, 1024*base]
+
+	Following Theorem 5.4.1 of the zCash Sapling specification, for baby jub_jub
+	we need a new base point every 62 windows. We will therefore have multiple
+	tables with 62 rows each.
 	"""
 	result = Point.infinity()
+	windows = []
 	for i, s in enumerate(scalars):
-		base = pedersen_hash_basepoint(name, i)
-		windows = list((s >> i) & 0b111 for i in range(0,s.bit_length(),3))
-		for j, window in enumerate(windows):
-			segment_base =  base * 2**(4*j)
-			segment = segment_base * ((window & 0b11) + 1)
-			if window > 0b11:
-				segment = segment.neg()
-			result += segment
+		windows += list((s >> i) & 0b111 for i in range(0,s.bit_length(),3))
+	
+	base = Point.infinity()
+	for j, window in enumerate(windows):
+		if j % 62 == 0:
+			base = pedersen_hash_basepoint(name, int(j/62))
+			print("New Base: ", base)
+		j = j % 62
+		segment_base =  base * 2**(4*j)
+		segment = segment_base * ((window & 0b11) + 1)
+		if window > 0b11:
+			segment = segment.neg()
+		result += segment
 	return result

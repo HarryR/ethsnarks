@@ -6,11 +6,7 @@ namespace jubjub {
 
 const static char chunk_size_bits = 3;
 const static char lookup_size_bits = 2;
-
-struct Point {
-	FieldT x;
-	FieldT y;
-};
+const static char chunks_per_base_point = 62;
 
 Point add(Point lhs, Point rhs, const Params& in_params) {
 	Point result;
@@ -29,24 +25,27 @@ Point add(Point lhs, Point rhs, const Params& in_params) {
 fixed_base_mul_zcash::fixed_base_mul_zcash(
 	ProtoboardT &in_pb,
 	const Params& in_params,
-	const FieldT& in_base_x,
-	const FieldT& in_base_y,
+	const std::vector<Point> base_points,
 	const VariableArrayT in_scalar,
 	const std::string &annotation_prefix
 ) :
 	GadgetT(in_pb, annotation_prefix)
 {
 	assert( (in_scalar.size() % chunk_size_bits) == 0 );
+	assert( float(in_scalar.size()) / float(chunk_size_bits * chunks_per_base_point) <= base_points.size());
 	int window_size_items = 1 << lookup_size_bits;
 	int n_windows = in_scalar.size() / chunk_size_bits;
 
-	Point start = { in_base_x, in_base_y };
-
+	Point start = base_points[0];
 	// Precompute values for all lookup window tables
 	for( int i = 0; i < n_windows; i++ )
 	{
 		std::vector<FieldT> lookup_x;
 		std::vector<FieldT> lookup_y;
+
+		if (i % chunks_per_base_point == 0) {
+			start = base_points[i/chunks_per_base_point];
+		}
 
 		// For each window, generate 4 points, in little endian:
 		// (0,0) = 0 = start = base*2^4i

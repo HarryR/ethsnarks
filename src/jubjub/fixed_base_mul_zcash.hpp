@@ -10,24 +10,11 @@ namespace ethsnarks {
 
 namespace jubjub {
 
+struct Point {
+	FieldT x;
+	FieldT y;
+};
 
-/**
-* Implements scalar multiplication using a fixed base point and a 2-bit lookup window 
-*
-*     input bits 0...n   with 2 bit lookup  windows
-*   +--------+----------+------------+-----------+---....
-*   |  0-2   |    3-4   |    5-6     |    7-8    |   9-.
-*   +--------+----------+------------+-----------+---....
-*      | |        | |        | |          | |         | |
-*   +------+   +------+    +------+     +------+     +...
-*   | LUT0 |   | LUT1 |    | LUT2 |     | LUTn |     |
-*   +------+   +------+    +------+     +------+     +...
-*       |          |          |            |            |
-*   +-----------------+   +---------+  +---------+   +...
-*   |      ADDER 0    |---| ADDER 1 |--| ADDER n |---|
-*   +-----------------+   +---------+  +---------+   +...
-*
-*/
 class fixed_base_mul_zcash : public GadgetT {
 public:
 	const VariableArrayT m_scalar;
@@ -39,8 +26,7 @@ public:
 	fixed_base_mul_zcash(
 		ProtoboardT &in_pb,
 		const Params& in_params,
-		const FieldT& in_base_x,
-		const FieldT& in_base_y,
+		const std::vector<Point> base_points,
 		const VariableArrayT in_scalar,
 		const std::string &annotation_prefix
 	);
