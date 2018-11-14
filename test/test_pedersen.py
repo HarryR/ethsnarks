@@ -3,7 +3,7 @@ from os import urandom
 from random import randint
 
 from ethsnarks.jubjub import Point
-from ethsnarks.pedersen import pedersen_hash_points, pedersen_hash_scalars, pedersen_hash_bytes
+from ethsnarks.pedersen import pedersen_hash_points, pedersen_hash_scalars, pedersen_hash_bytes, pedersen_hash_zcash_scalars
 
 
 class TestPedersenHash(unittest.TestCase):
@@ -23,7 +23,14 @@ class TestPedersenHash(unittest.TestCase):
 		self.assertTrue(q.valid())
 		self.assertTrue(r.valid())
 		self.assertNotEqual(q, r)
-
+	
+	def test_zcash(self):
+		d = randint(1, 1024)
+		p = pedersen_hash_zcash_scalars(b'test', d)
+		q = pedersen_hash_zcash_scalars(b'test', d, d)
+		self.assertTrue(p.valid)
+		self.assertTrue(q.valid)
+		self.assertNotEqual(p, q)
 
 if __name__ == "__main__":
 	unittest.main()

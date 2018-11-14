@@ -13,5 +13,8 @@ target_link_libraries(test_jubjub_dbl ethsnarks_common ethsnarks_jubjub)
 add_executable(test_jubjub_mul_fixed test_jubjub_mul_fixed.cpp)
 target_link_libraries(test_jubjub_mul_fixed ethsnarks_common ethsnarks_jubjub)
 
+add_executable(test_jubjub_mul_fixed_zcash test_jubjub_mul_fixed_zcash.cpp)
+target_link_libraries(test_jubjub_mul_fixed_zcash ethsnarks_common ethsnarks_jubjub)
+
 add_executable(test_jubjub_isoncurve test_jubjub_isoncurve.cpp)
 target_link_libraries(test_jubjub_isoncurve ethsnarks_common ethsnarks_jubjub)

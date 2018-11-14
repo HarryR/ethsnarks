@@ -106,3 +106,31 @@ def pedersen_hash_bytes(name, *args):
 		scalar = int.from_bytes(segment, 'big')
 		result += base * scalar
 	return result
+
+def pedersen_hash_zcash_scalars(name, *scalars):
+	"""
+	Calculates a pedersen hash of scalars in the same way that zCash
+	is doing it according to: ... of their spec.
+
+	It is looking up 3bit chunks in a 2bit table (3rd bit denotes sign).
+	E.g:
+		(b2, b1, b0) = (1,0,1) would look up first element and negate it.
+
+	Row i of the lookup table contains:
+		[2**4i * base, 2 * 2**4i * base, 3 * 2**4i * base, 3 * 2**4i * base]
+	E.g:
+		row_0 = [base, 2*base, 3*base, 4*base]
+		row_1 = [16*base, 32*base, 48*base, 64*base]
+		row_2 = [256*base, 512*base, 768*base, 1024*base]
+	"""
+	result = Point.infinity()
+	for i, s in enumerate(scalars):
+		base = pedersen_hash_basepoint(name, i)
+		windows = list((s >> i) & 0b111 for i in range(0,s.bit_length(),3))
+		for j, window in enumerate(windows):
+			segment_base =  base * 2**(4*j)
+			segment = segment_base * ((window & 0b11) + 1)
+			if window > 0b11:
+				segment = segment.neg()
+			result += segment
+	return result

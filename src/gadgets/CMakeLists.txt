@@ -12,5 +12,6 @@ add_library(ethsnarks_gadgets STATIC
 	lookup_1bit.cpp
 	lookup_2bit.cpp
 	lookup_3bit.cpp
+	lookup_signed_3bit.cpp
 	subadd.cpp
 )

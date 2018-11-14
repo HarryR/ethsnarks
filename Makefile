@@ -93,6 +93,7 @@ cxx-tests: zksnark_element/miximus.vk.json
 	./bin/test_jubjub_dbl
 	./bin/test_jubjub_mul
 	./bin/test_jubjub_mul_fixed
+	./bin/test_jubjub_mul_fixed_zcash
 	./bin/test_jubjub_isoncurve > /dev/null
 
 	time ./bin/hashpreimage_cli genkeys zksnark_element/hpi.pk.raw zksnark_element/hpi.vk.json
