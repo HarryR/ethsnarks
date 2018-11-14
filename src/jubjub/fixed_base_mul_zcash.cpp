@@ -22,6 +22,29 @@ Point add(Point lhs, Point rhs, const Params& in_params) {
 	};
 }
 
+Point to_montgomery(Point edwards, const Params& in_params) {
+	if(edwards.y == FieldT::one()) {
+		return {FieldT::zero(), FieldT::zero()}; //This should be infinity
+	} else if (edwards.x.is_zero()) {
+		return {FieldT::zero(), FieldT::zero()};
+	} else {
+		// The mapping is defined as above.
+		//
+		// (x, y) -> (u, v) where
+		//      u = (1 + y) / (1 - y)
+		//      v = u / x
+		FieldT u = (FieldT::one() + edwards.y) * (FieldT::one() - edwards.y).inverse();
+		return {u, in_params.scale * u * edwards.x.inverse()};
+	}
+}
+
+Point to_edwards(Point montgomery, const Params& in_params) {
+	return {
+		in_params.scale * montgomery.x * montgomery.y.inverse(),
+		(montgomery.x - FieldT::one()) * (montgomery.x + FieldT::one()).inverse()
+	};
+}
+
 fixed_base_mul_zcash::fixed_base_mul_zcash(
 	ProtoboardT &in_pb,
 	const Params& in_params,
@@ -58,13 +81,18 @@ fixed_base_mul_zcash::fixed_base_mul_zcash(
 			if (j != 0) {
 				current = add(current, start, in_params);
 			}
-			lookup_x.emplace_back(current.x);
-			lookup_y.emplace_back(current.y);
+			Point montgomery = to_montgomery(current, in_params);
+			lookup_x.emplace_back(montgomery.x);
+			lookup_y.emplace_back(montgomery.y);
+
+			Point edward = to_edwards(montgomery, in_params);
+			assert (edward.x == current.x);
+			assert (edward.y == current.y);
 		}
 
 		const auto bits_begin = in_scalar.begin() + (i * chunk_size_bits);
-		const VariableArrayT window_bits_x( bits_begin, bits_begin + chunk_size_bits );
-		const VariableArrayT window_bits_y( bits_begin, bits_begin + lookup_size_bits );
+		const VariableArrayT window_bits_x( bits_begin, bits_begin + lookup_size_bits );
+		const VariableArrayT window_bits_y( bits_begin, bits_begin + chunk_size_bits );
 		m_windows_x.emplace_back(in_pb, lookup_x, window_bits_x, FMT(annotation_prefix, ".windows_x[%d]", i));
 		m_windows_y.emplace_back(in_pb, lookup_y, window_bits_y, FMT(annotation_prefix, ".windows_y[%d]", i));
 
@@ -73,27 +101,67 @@ fixed_base_mul_zcash::fixed_base_mul_zcash(
 		start = add(current, current, in_params);
 	}
 
-	// Chain adders together, adding output of previous adder with current window
-	// First adder ads the first two windows together as there is no previous adder
+	// Chain adders within one segment together via montgomery adders
 	for( int i = 1; i < n_windows; i++ )
 	{
-		if( i == 1 ) {				
-			m_adders.emplace_back(
+		if( i % chunks_per_base_point == 1 ) {				
+			montgomery_adders.emplace_back(
 				in_pb, in_params,
 				m_windows_x[i-1].result(),
 				m_windows_y[i-1].result(),
 				m_windows_x[i].result(),
 				m_windows_y[i].result(),
-				FMT(this->annotation_prefix, ".adders[%d]", i));
+				FMT(this->annotation_prefix, ".mg_adders[%d]", i));
 		}
 		else {
-			m_adders.emplace_back(
+			montgomery_adders.emplace_back(
 				in_pb, in_params,
-				m_adders[i-2].result_x(),
-				m_adders[i-2].result_y(),
+				montgomery_adders[i-2].result_x(),
+				montgomery_adders[i-2].result_y(),
 				m_windows_x[i].result(),
 				m_windows_y[i].result(),
-				FMT(this->annotation_prefix, ".adders[%d]", i));
+				FMT(this->annotation_prefix, ".mg_adders[%d]", i));
+		}
+	}
+
+	// Convert every point at the end of a segment back to edwards format
+	size_t segment_width = chunks_per_base_point - 1;
+	for(int i = segment_width; i < montgomery_adders.size() - 1 /*we deal with the last one at the end*/; i += segment_width ) {
+		point_converters.emplace_back(
+			in_pb, in_params,
+			montgomery_adders[i-1].result_x(),
+			montgomery_adders[i-1].result_y(),
+			FMT(this->annotation_prefix, ".point_conversion[%d]", i)
+		);
+	}
+	// The last segment might be incomplete
+	point_converters.emplace_back(
+		in_pb, in_params,
+		montgomery_adders.back().result_x(),
+		montgomery_adders.back().result_y(),
+		FMT(this->annotation_prefix, ".point_conversion_final")
+	);
+
+	// Chain adders of converted segment tails together
+	for( int i = 1; i < point_converters.size(); i++ ) {
+		if (i == 1) {
+			edward_adders.emplace_back(
+				in_pb, in_params,
+				point_converters[i-1].result_x(),
+				point_converters[i-1].result_y(),
+				point_converters[i].result_x(),
+				point_converters[i].result_y(),
+				FMT(this->annotation_prefix, ".edward_adder[%d]", i)
+			);
+		} else {
+			edward_adders.emplace_back(
+				in_pb, in_params,
+				edward_adders[i-2].result_x(),
+				edward_adders[i-2].result_y(),
+				point_converters[i].result_x(),
+				point_converters[i].result_y(),
+				FMT(this->annotation_prefix, ".edward_adder[%d]", i)
+			);
 		}
 	}
 }
@@ -108,7 +176,15 @@ void fixed_base_mul_zcash::generate_r1cs_constraints ()
 		lut_y.generate_r1cs_constraints();
 	}
 
-	for( auto& adder : m_adders ) {
+	for( auto& adder : montgomery_adders ) {
+		adder.generate_r1cs_constraints();
+	}
+
+	for( auto& converter : point_converters ) {
+		converter.generate_r1cs_constraints();
+	}
+
+	for( auto& adder : edward_adders ) {
 		adder.generate_r1cs_constraints();
 	}
 }
@@ -123,17 +199,25 @@ void fixed_base_mul_zcash::generate_r1cs_witness ()
 		lut_y.generate_r1cs_witness();
 	}
 
-	for( auto& adder : m_adders ) {
+	for( auto& adder : montgomery_adders ) {
+		adder.generate_r1cs_witness();
+	}
+
+	for( auto& converter : point_converters ) {
+		converter.generate_r1cs_witness();
+	}
+
+	for( auto& adder : edward_adders ) {
 		adder.generate_r1cs_witness();
 	}
 }
 
 const VariableT& fixed_base_mul_zcash::result_x() {
-	return m_adders[ m_adders.size() - 1 ].result_x();
+	return edward_adders.back().result_x();
 }
 
 const VariableT& fixed_base_mul_zcash::result_y() {
-	return m_adders[ m_adders.size() - 1 ].result_y();
+	return edward_adders.back().result_y();
 }
 
 // namespace jubjub

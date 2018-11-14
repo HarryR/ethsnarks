@@ -136,11 +136,11 @@ def pedersen_hash_zcash_scalars(name, *scalars):
 	for j, window in enumerate(windows):
 		if j % 62 == 0:
 			base = pedersen_hash_basepoint(name, int(j/62))
-			print("New Base: ", base)
 		j = j % 62
 		segment_base =  base * 2**(4*j)
 		segment = segment_base * ((window & 0b11) + 1)
 		if window > 0b11:
 			segment = segment.neg()
 		result += segment
+	
 	return result

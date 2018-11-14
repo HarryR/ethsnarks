@@ -202,6 +202,35 @@ public:
     void generate_r1cs_witness();
 };
 
+namespace montgomery {
+
+class EdwardConversion : public GadgetT {
+public:
+    const Params& m_params;
+    
+    // Input point
+    const VariableT m_X1;
+    const VariableT m_Y1;
+
+    // Output point
+    const VariableT m_X2;
+    const VariableT m_Y2;
+
+    EdwardConversion(
+        ProtoboardT &in_pb,
+        const Params& in_params,
+        const VariableT in_X,
+        const VariableT in_Y,
+        const std::string &annotation_prefix
+    );
+
+    const VariableT& result_x() const;
+    const VariableT& result_y() const;
+
+    void generate_r1cs_constraints();
+    void generate_r1cs_witness();
+}; 
+}
 
 // namespace jubjub
 }

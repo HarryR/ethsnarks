@@ -362,6 +362,49 @@ void pointMultiplication::generate_r1cs_witness()
     }
 }
 
+namespace montgomery {
+
+EdwardConversion::EdwardConversion(
+    ProtoboardT &in_pb,
+    const Params& in_params,
+    const VariableT in_X,
+    const VariableT in_Y,
+    const std::string &annotation_prefix
+) : GadgetT(in_pb, annotation_prefix),
+    m_params(in_params),
+    m_X1(in_X), m_Y1(in_Y),
+    m_X2(make_variable(in_pb, FMT(annotation_prefix, ".result_x"))),
+    m_Y2(make_variable(in_pb, FMT(annotation_prefix, ".result_y")))
+{}
+
+void EdwardConversion::generate_r1cs_constraints()
+{
+    this->pb.add_r1cs_constraint(
+        ConstraintT(m_Y1, m_X2, m_X1 * m_params.scale),
+            FMT(annotation_prefix, ".x_result' = (scale*x) / y"));
+    this->pb.add_r1cs_constraint(
+        ConstraintT({m_X1 + FieldT::one()}, m_Y2, { m_X1 - FieldT::one() }),
+            FMT(annotation_prefix, ".y_result' = (x - 1) / (x + 1)"));
+}
+
+void EdwardConversion::generate_r1cs_witness()
+{
+    this->pb.val(m_X2) = m_params.scale * this->pb.val(m_X1) * this->pb.val(m_Y1).inverse();
+    this->pb.val(m_Y2) = (this->pb.val(m_X1) - FieldT::one()) * (this->pb.val(m_X1) + FieldT::one()).inverse();
+}
+
+const VariableT& EdwardConversion::result_x() const
+{
+    return m_X2;
+}
+
+const VariableT& EdwardConversion::result_y() const
+{
+    return m_Y2;
+}
+
+// namespace montgomery    
+}
 
 // namespace jubjub
 }

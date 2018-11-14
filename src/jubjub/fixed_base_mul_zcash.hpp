@@ -4,6 +4,7 @@
 #include "gadgets/lookup_2bit.hpp"
 #include "gadgets/lookup_signed_3bit.hpp"
 #include "jubjub/adder.hpp"
+#include "jubjub/curve.hpp"
 
 namespace ethsnarks {
 
@@ -18,9 +19,11 @@ class fixed_base_mul_zcash : public GadgetT {
 public:
 	const VariableArrayT m_scalar;
 
-	std::vector<PointAdder> m_adders;
-	std::vector<lookup_signed_3bit_gadget> m_windows_x;
-	std::vector<lookup_2bit_gadget> m_windows_y;
+	std::vector<montgomery::PointAdder> montgomery_adders;
+	std::vector<montgomery::EdwardConversion> point_converters;
+	std::vector<PointAdder> edward_adders;
+	std::vector<lookup_2bit_gadget> m_windows_x;
+	std::vector<lookup_signed_3bit_gadget> m_windows_y;
 
 	fixed_base_mul_zcash(
 		ProtoboardT &in_pb,

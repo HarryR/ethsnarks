@@ -17,11 +17,13 @@ public:
 
     // Montgomery parameters
     const FieldT A;
+    const FieldT scale;
 
     Params() :
         a("168700"),
         d("168696"),
-        A("168698")
+        A("168698"),
+        scale("1")
     {}
 };
 

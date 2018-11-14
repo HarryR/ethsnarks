@@ -6,7 +6,6 @@ namespace ethsnarks {
 
 namespace jubjub {
 
-
 PointAdder::PointAdder(
     ProtoboardT& in_pb,
     const Params& in_params,
@@ -27,10 +26,7 @@ PointAdder::PointAdder(
     m_tau(make_variable(in_pb, FMT(annotation_prefix, ".tau"))),
     m_X3(make_variable(in_pb, FMT(annotation_prefix, ".X3"))),
     m_Y3(make_variable(in_pb, FMT(annotation_prefix, ".Y3")))
-{
-
-}
-
+{}
 
 void PointAdder::generate_r1cs_constraints()
 {
@@ -63,18 +59,15 @@ void PointAdder::generate_r1cs_constraints()
             FMT(annotation_prefix, ".y3 * (1 - (d*tau)) == (delta - a*epsilon) "));
 }
 
-
 const VariableT& PointAdder::result_x() const
 {
     return m_X3;
 }
 
-
 const VariableT& PointAdder::result_y() const
 {
     return m_Y3;
 }
-
 
 void PointAdder::generate_r1cs_witness()
 {
@@ -97,6 +90,58 @@ void PointAdder::generate_r1cs_witness()
     this->pb.val(m_Y3) = (this->pb.val(m_delta)+( -m_params.a * this->pb.val(m_epsilon))) * y3_rhs;
 }
 
+namespace montgomery {
+
+PointAdder::PointAdder(
+    ProtoboardT& in_pb,
+    const Params& in_params,
+    const VariableT in_X1,
+    const VariableT in_Y1,
+    const VariableT in_X2,
+    const VariableT in_Y2,
+    const std::string &annotation_prefix
+) :
+    GadgetT(in_pb, annotation_prefix),
+    m_params(in_params),
+    m_X1(in_X1), m_Y1(in_Y1),
+    m_X2(in_X2), m_Y2(in_Y2),
+    lambda(make_variable(in_pb, FMT(annotation_prefix, ".lambda"))),
+    m_X3(make_variable(in_pb, FMT(annotation_prefix, ".X3"))),
+    m_Y3(make_variable(in_pb, FMT(annotation_prefix, ".Y3")))
+{}
+
+void PointAdder::generate_r1cs_constraints()
+{
+    this->pb.add_r1cs_constraint(
+        ConstraintT({m_X2 - m_X1}, lambda, {m_Y2 - m_Y1}),
+            FMT(annotation_prefix, ".lambda = (y' - y) / (x' - x)"));
+    this->pb.add_r1cs_constraint(
+        ConstraintT(lambda, lambda, {m_params.A + m_X1 + m_X2 + m_X3}),
+            FMT(annotation_prefix, ".(lambda) * (lambda) = (A + x + x' + x'')"));
+    this->pb.add_r1cs_constraint(
+        ConstraintT({m_X1 - m_X3}, lambda, {m_Y3 + m_Y1}),
+            FMT(annotation_prefix, ".y'' = -(y + lambda(x'' - x))"));
+}
+
+const VariableT& PointAdder::result_x() const
+{
+    return m_X3;
+}
+
+const VariableT& PointAdder::result_y() const
+{
+    return m_Y3;
+}
+
+void PointAdder::generate_r1cs_witness()
+{
+    this->pb.val(lambda) = (this->pb.val(m_Y2) - this->pb.val(m_Y1)) * (this->pb.val(m_X2) - this->pb.val(m_X1)).inverse();
+    this->pb.val(m_X3) = this->pb.val(lambda).squared() - m_params.A - this->pb.val(m_X1) - this->pb.val(m_X2);
+    this->pb.val(m_Y3) = -(this->pb.val(m_Y1) + (this->pb.val(lambda)*(this->pb.val(m_X3) - this->pb.val(m_X1))));
+}
+
+// namespace montgomery
+}
 
 // namespace jubjub
 }
