@@ -68,7 +68,7 @@ assert JUBJUB_D == (MONT_A-2)/MONT_B
 
 def is_negative(v):
 	assert isinstance(v, FQ)
-	return v.n < (-v).n
+	return v.n > (-v).n
 
 
 class AbstractCurveOps(object):
@@ -160,7 +160,7 @@ class Point(AbstractCurveOps, namedtuple('_Point', ('x', 'y'))):
 		x = xsq.sqrt()
 		if sign is not None:
 			# Used for compress & decompress
-			if (x.n & 1) != sign:
+			if is_negative(x) ^ (sign != 0):
 				x = -x
 		else:
 			if is_negative(x):
@@ -235,9 +235,9 @@ class Point(AbstractCurveOps, namedtuple('_Point', ('x', 'y'))):
 		return hash((self.x, self.y))
 
 	def compress(self):
-		x = self.x.n
+		x = self.x
 		y = self.y.n
-		return int.to_bytes(y | ((x&1) << 255), 32, "little")
+		return int.to_bytes(y | (is_negative(x) << 255), 32, "little")
 
 	@classmethod
 	def decompress(cls, point):
