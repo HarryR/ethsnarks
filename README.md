@@ -1,3 +1,19 @@
+## This repo is archived for prosperity
+
+While ethsnarks has been of use to many, and at the time did fit a niche in the Ethereum ecosystem, unfortunately I don't have time to maintain the project and would warn people away from using Ethsnarks as the basis for their project. Many other projects have been developed since its inception that do everything a lot better, have been reviewed by more developers, have more active support - or have simply jumped ahead leaps & bounds to take advantage of new developments made in the past 5 years.
+
+For more information, try some of these awesome lists:
+
+ * https://github.com/ventali/awesome-zk
+ * https://github.com/LuozhuZhang/Awesome-zkEVM
+ * https://github.com/matter-labs/awesome-zero-knowledge-proofs
+
+Please note, the PyPi package at https://pypi.org/project/ethsnarks/ should also be considered deprecated.
+
+Thanks to all who've been involved, everybody who provided inspiration and feedback, the Ethereum foundation, everybody who used it or was inspired to make better things. ZK is here, on desktop, on mobile, on-chain, in browsers it's amazing to see how much progress there has been, and I'm excited to see how much more progress there will be in the next 5 years.
+
+----------------
+
 # EthSnarks
 
 [![Join the chat at https://gitter.im/ethsnarks](https://badges.gitter.im/ethsnarks.png)](https://gitter.im/ethsnarks?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
